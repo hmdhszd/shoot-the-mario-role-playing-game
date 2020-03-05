@@ -7,6 +7,34 @@ from PIL import Image, ImageTk
 
 
 
+
+
+class Bullet: 
+    def levelup(self):
+        print(self.levelup_degree)
+
+
+class Mushroom(Bullet):
+    def __init__(self):
+        self.name = "Mushroom"
+        self.bullet_image = "mushroom.jpg"
+        self.levelup_degree = 10
+
+
+class Turtle(Bullet):
+    def __init__(self):
+        self.name = "Turtle"
+        self.bullet_image = "turtle.png"
+        self.levelup_degree = 20
+
+
+player = Turtle()
+player.levelup()
+
+player = Mushroom()
+player.levelup()
+
+
 root = Tk()
 
 
@@ -23,7 +51,7 @@ def setBG():
 
 
 def placemushroom(x,y):
-    load = Image.open("mushroom.jpg")
+    load = Image.open("turtle.png")
     render = ImageTk.PhotoImage(load)
     img = Label(root, image=render)
     img.image = render
