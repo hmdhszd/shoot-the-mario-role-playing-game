@@ -1,59 +1,46 @@
 from tkinter import *
 from tkinter.ttk import *
 import random
-from time import strftime 
+from time import strftime
 from PIL import Image, ImageTk
+import pygame
 
 
 
 
-class Bullet: 
+class Bullet:
+    def __init__(self):
+        self.point = 0
+        
     def levelup(self):
-        print(self.levelup_degree)
+        self.point += self.levelup_degree
+        print(self.point)
 
 
 class Mushroom(Bullet):
     def __init__(self):
+        super().__init__()
         self.name = "Mushroom"
         self.bullet_image = "mushroom.jpg"
+        self.bullet_width = 74
+        self.bullet_height = 72
         self.levelup_degree = 10
 
 
 class Turtle(Bullet):
     def __init__(self):
+        super().__init__()
         self.name = "Turtle"
         self.bullet_image = "turtle.png"
+        self.bullet_width = 43
+        self.bullet_height = 39
         self.levelup_degree = 20
 
 
 
+how_many_rounds = 6
+position_of_mario = {(0,0)}
 
-
-
-x = 1
-
-
-mushroomx= 1310
-mushroomy= 650
-
-
-
-
-
-def placemushroom(x,y):
-    load = Image.open("turtle.png")
-    render = ImageTk.PhotoImage(load)
-    img = Label(root, image=render)
-    img.image = render
-    img.place(x=x, y=y)
-
-
-def placemario(x,y):
-    load = Image.open("mario.jpg")
-    render = ImageTk.PhotoImage(load)
-    img = Label(root, image=render)
-    img.image = render
-    img.place(x=x, y=y)
 
 
 def PlaceImage(x,y,img,window):
@@ -66,20 +53,29 @@ def PlaceImage(x,y,img,window):
 
 
 def update(): 
-    global mushroomx
-    global mushroomy
-    lbl.config(text = "Fired!")
-    #lbl.config(text = strftime('%H:%M:%S %p'))
-    lbl.after(300, update)
+    global bulletplacex
+    global bulletplacey
+    lblll.config(text = "Fired!")
+    lblll.after(500, update)
     PlaceImage(0,0,"bg.png",root)
-    if (mushroomx <= 0) or (mushroomy <= 0):
+
+    
+    
+    if (bulletplacex <= 0) or (bulletplacey <= 0):
         print("outttt")
-        exit()
+        root.destroy()
+        
+    elif (((bulletplacex,bulletplacey) in position_of_mario) or ((bulletplacex  + player.bullet_width,bulletplacey) in position_of_mario) or ((bulletplacex,bulletplacey + player.bullet_height) in position_of_mario) or ((bulletplacex + player.bullet_width,bulletplacey + player.bullet_height) in position_of_mario)):
+        print("khordddd")
+        player.levelup()
+        root.destroy()
+
     else:
-        mushroomx -= int(speedcombo.get())
-        mushroomy -= int(Powercombo.get())
-        placemushroom(mushroomx,mushroomy)
-        placemario(mariox,marioy)
+        bulletplacex -= int(speedcombo.get())
+        bulletplacey -= int(Powercombo.get())
+        PlaceImage(bulletplacex,bulletplacey, player.bullet_image ,root)
+        PlaceImage(mariox,marioy, "mario.jpg", root)
+        
     
 
 
@@ -95,14 +91,20 @@ def SelectTurtle():
     selectplayer.destroy()
 
 
+#________________________________________________________
 
 
 selectplayer = Tk()
 PlaceImage(-600,-500,"bg.png",selectplayer)
 
+pygame.init()
+pygame.mixer.music.load("music1.mp3")
+pygame.mixer.music.play()
+
 titre = Label(selectplayer,text= "Select Your Bullet" , font = ('arial', 20, 'bold'), foreground = 'red')
 titre.pack(anchor = 'center') 
 
+#________________________________________________________
 
 
 PlaceImage(80,180,"mushroom.jpg",selectplayer)
@@ -120,10 +122,7 @@ btn = Button(selectplayer, text="Select Mushroom", command=SelectMushroom)
 btn.place(x=55,y=340)
 
 
-
-
-
-
+#________________________________________________________
 
 
 PlaceImage(370,195,"turtle.png",selectplayer)
@@ -140,41 +139,48 @@ btn1 = Button(selectplayer, text="Select Turtle", command=SelectTurtle)
 btn1.place(x=348,y=340)
 
 
-
-
-
-
-
+#________________________________________________________
 
 selectplayer.geometry("529x460")
 selectplayer.mainloop()
 
+#________________________________________________________
+#________________________________________________________
 
 
 
 
-
-
-
-
-
-
-for i in range(0,x):
+for i in range(1,how_many_rounds):
+    pygame.init()
+    pygame.mixer.music.load("music2.mp3")
+    pygame.mixer.music.play()
+    bulletplacex= 1310
+    bulletplacey= 650
     root = Tk()
     PlaceImage(0,0,"bg.png",root)
-    print(player.name)
     mariox = random.randrange(50, 850)
     marioy = random.randrange(50, 650)
-    placemario(mariox,marioy)
+    PlaceImage(mariox,marioy, "mario.jpg", root)
+    PlaceImage(bulletplacex,bulletplacey, player.bullet_image , root)
     
-    placemushroom(mushroomx,mushroomy)
+    
+
+    #________________________________________________________
 
 
+    for ii in range(mariox , (mariox + 135)):
+        for jj in range(marioy, (marioy + 163)):
+            position_of_mario.add((ii,jj))
+    
+       
+    #________________________________________________________
+
+       
     speedcombo = Combobox(root)
     speedcombo['values']= (10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
     speedcombo.current(0)
     speedcombo.place(x=1350, y=890)
-    speedlable = Label(root, text="Select Speed (1 to 10)")
+    speedlable = Label(root, text="Horizontal (10 to 100)")
     speedlable.place(x=1200, y=891)
 
 
@@ -183,59 +189,44 @@ for i in range(0,x):
     Powercombo['values']= (10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
     Powercombo.current(0)
     Powercombo.place(x=1350, y=920)
-    Powerlable = Label(root, text="Select Power (1 to 10)")
+    Powerlable = Label(root, text="Vertical (10 to 100)")
     Powerlable.place(x=1200, y=921)
 
 
+    #________________________________________________________
 
 
-        
-        
-        
+    gameround = "round " + str(i) + " of " + str(how_many_rounds-1)
+
+    pointtt = Label(root, font = ('arial', 20, 'bold'), foreground = 'red', text=gameround ) 
+    pointtt.pack(anchor = 'center') 
+
+    gamepoint = "your point is " + str(player.point)
+    lblll = Label(root, font = ('arial', 20, 'bold'), foreground = 'red', text=gamepoint) 
+    lblll.pack(anchor = 'center') 
+
+
+    #________________________________________________________
     
-
-
-
-
-    lbl = Label(root, font = ('arial', 20, 'bold'), foreground = 'red') 
-    lbl.pack(anchor = 'center') 
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
     btn = Button(root, text="Fire!", command=update)
     btn.place(x=1310, y=945)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
 
     root.geometry("1529x976")
     root.mainloop()
 
+
+#________________________________________________________
+#________________________________________________________
+
+
+
+endingpage = Tk()
+PlaceImage(-600,-500,"bg.png",endingpage)
+
+titre = Label(endingpage,text= "Game is finished" , font = ('arial', 20, 'bold'), foreground = 'red')
+titre.pack(anchor = 'center')
+
+msgg = "Total Point is:" + str(player.point)
+titre = Label(endingpage,text= msgg , font = ('arial', 20, 'bold'), foreground = 'red')
+titre.pack(anchor = 'center')
+endingpage.mainloop()
